@@ -8,7 +8,11 @@ const port = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 
-// Conexión a la base de datos PostgreSQL usando la variable de entorno
+// ----------------------------------------------------
+// Línea de código para servir los archivos del frontend
+app.use(express.static('../frontend'));
+// ----------------------------------------------------
+
 const client = new Client({
     connectionString: process.env.DATABASE_URL,
     ssl: {
@@ -21,7 +25,6 @@ async function connectAndSetupDb() {
         await client.connect();
         console.log("Conectado a PostgreSQL");
 
-        // Crea la tabla de votos si no existe
         const createTableQuery = `
             CREATE TABLE IF NOT EXISTS votos (
                 id_candidato VARCHAR(255) PRIMARY KEY,
@@ -33,7 +36,6 @@ async function connectAndSetupDb() {
         await client.query(createTableQuery);
         console.log("Tabla 'votos' verificada/creada");
 
-        // Inserta a los candidatos si no existen.
         const insertCandidatesQuery = `
             INSERT INTO votos (id_candidato, nombre, partido) VALUES
             ('jorge-quiroga', 'Jorge Quiroga Ramírez', 'Alianza Libre'),
@@ -56,7 +58,6 @@ async function connectAndSetupDb() {
 
 connectAndSetupDb();
 
-// Rutas de la API
 app.post('/api/vote', async (req, res) => {
     const { candidatoId } = req.body;
     if (!candidatoId) {
